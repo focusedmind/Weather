@@ -1,5 +1,5 @@
 //
-//  ViewController.swift
+//  RootController.swift
 //  WeatherTest
 //
 //  Created by iOS Developer on 2/9/23.
@@ -18,7 +18,12 @@ class RootController: UIPageViewController {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
         dataSource = self
-        setupPresenter()
+        bindToPresenter()
+        let currentVC = WeatherController(presenter: .init(isCurrent: true,
+                                                           location: nil,
+                                                           gateway: NetworkWeatherGateway(),
+                                                           delegate: presenter))
+        setViewControllers([currentVC], direction: .forward, animated: true)
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -26,7 +31,7 @@ class RootController: UIPageViewController {
         presenter.handleViewWillAppear()
     }
     
-    private func setupPresenter() {
+    private func bindToPresenter() {
         presenter
             .alertPublisher
             .receive(on: DispatchQueue.main)

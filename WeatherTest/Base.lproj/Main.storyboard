@@ -30,7 +30,7 @@
         <!--Weather-->
         <scene sceneID="naE-eu-Z9z">
             <objects>
-                <pageViewController autoresizesArchivedViewToFullSize="NO" transitionStyle="scroll" navigationOrientation="horizontal" spineLocation="none" id="OeB-Qz-3yD" sceneMemberID="viewController">
+                <pageViewController autoresizesArchivedViewToFullSize="NO" transitionStyle="scroll" navigationOrientation="horizontal" spineLocation="none" id="OeB-Qz-3yD" customClass="RootController" customModule="WeatherTest" customModuleProvider="target" sceneMemberID="viewController">
                     <navigationItem key="navigationItem" title="Weather" id="JfQ-F7-6EU"/>
                 </pageViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="7Sf-Kk-wg4" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>

@@ -10,9 +10,15 @@ import Combine
 import CoreLocation
 import UIKit
 
+enum LocationState {
+    case value(CLLocation?)
+    case waiting
+}
+
 protocol RootPresenterProtocol: AnyObject {
-    var locationPublisher: PassthroughSubject<CLLocation?, Never> { get }
+    var locationPublisher: CurrentValueSubject<LocationState, Never> { get }
     
+    func handleCurrentLocationRequest()
     func handleTriggeredAlert(with model: AlertModel)
 }
 
@@ -21,12 +27,16 @@ class RootPresenter: NSObject {
     private let locationManager = CLLocationManager()
     private var settings: Settings = UserDefaults.standard
     private var hasPermissionsBeenCheckedOnAppear = false
+    private var notificatonCancellable: AnyCancellable? = nil
     let alertPublisher = PassthroughSubject<AlertModel, Never>()
-    let locationPublisher = PassthroughSubject<CLLocation?, Never>()
+    let locationPublisher = CurrentValueSubject<LocationState, Never>(.waiting)
     
     override init() {
         super.init()
         locationManager.delegate = self
+        notificatonCancellable = NotificationCenter.default
+            .publisher(for: UIApplication.willEnterForegroundNotification)
+            .sink(receiveValue: { [weak self] _ in self?.handleCurrentLocationRequest() })
     }
     
     func handleViewWillAppear() {
@@ -39,19 +49,23 @@ class RootPresenter: NSObject {
     private func checkPermissions(using locationManager: CLLocationManager) {
         switch locationManager.authorizationStatus {
         case .denied, .restricted:
-            let openSettingsAction = UIAlertAction(title: "Open Settings", style: .default, handler: { _ in
-                if let url = URL(string: UIApplication.openSettingsURLString), UIApplication.shared.canOpenURL(url) {
-                    UIApplication.shared.open(url)
-                }
-            })
-            let continueWithLowAccuracy = UIAlertAction(title: "Continue with low accuracy", style: .default, handler: { [weak self] _ in
-                self?.settings.isLowAccuracyModeEnabled = true
-                self?.locationPublisher.send(nil)
-            })
-            let alertModel = AlertModel(title: "Warning",
-                                        subtitle: "Warning",
-                                        actions: [openSettingsAction, continueWithLowAccuracy])
-            alertPublisher.send(alertModel)
+            if !settings.isLowAccuracyModeEnabled {
+                let openSettingsAction = UIAlertAction(title: "Open Settings", style: .default, handler: { _ in
+                    if let url = URL(string: UIApplication.openSettingsURLString), UIApplication.shared.canOpenURL(url) {
+                        UIApplication.shared.open(url)
+                    }
+                })
+                let continueWithLowAccuracy = UIAlertAction(title: "Continue with low accuracy", style: .default, handler: { [weak self] _ in
+                    self?.settings.isLowAccuracyModeEnabled = true
+                    self?.locationPublisher.send(.value(nil))
+                })
+                let alertModel = AlertModel(title: "Warning",
+                                            subtitle: "Missing location permissions",
+                                            actions: [openSettingsAction, continueWithLowAccuracy])
+                alertPublisher.send(alertModel)
+            } else {
+                locationPublisher.send(.value(nil))
+            }
         case .notDetermined:
             locationManager.requestWhenInUseAuthorization()
         case .authorizedAlways, .authorizedWhenInUse:
@@ -59,6 +73,10 @@ class RootPresenter: NSObject {
         @unknown default:
             break
         }
+    }
+    
+    func handleCurrentLocationRequest() {
+        checkPermissions(using: locationManager)
     }
 }
 
@@ -72,7 +90,7 @@ extension RootPresenter: RootPresenterProtocol {
 extension RootPresenter: CLLocationManagerDelegate {
     
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        locations.last.flatMap(locationPublisher.send)
+        locations.last.flatMap { locationPublisher.send(.value($0)) }
     }
     
     func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {

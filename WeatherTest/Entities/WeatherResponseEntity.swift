@@ -17,7 +17,6 @@ struct WeatherResponseEntity: Codable {
         let localtimeEpoch: Double
         var timestamp: Date { .init(timeIntervalSince1970: localtimeEpoch) }
 
-
         enum CodingKeys: String, CodingKey {
             case name, region, country, lat, lon
             case localtimeEpoch = "localtime_epoch"
@@ -37,7 +36,8 @@ struct WeatherEntity: Codable {
     let tempC, tempF: Double
     let isDay: Int
     let condition: Condition
-    let humidity, cloud: Int
+    let humidity: Double
+    let cloud: Int
 
     enum CodingKeys: String, CodingKey {
         case lastUpdatedEpoch = "last_updated_epoch"

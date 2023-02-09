@@ -15,12 +15,13 @@ protocol WeatherGateway {
     func fetchWeatherFuture(at location: CLLocation?) -> AnyPublisher<WeatherResponseEntity, Error>
 }
 
+//MARK: - Extract to different file
 class NetworkWeatherGateway: WeatherGateway {
     
     enum Constants {
-        static let host = "http://api.weatherapi.com/v1/"
+        static let host = "https://api.weatherapi.com/v1/"
         //MARK: - TODO store secret in keychain
-        static let key = ""
+        static let key = "89f7c1735875426f82c122657230902"
     }
     
     func fetchWeatherFuture(at location: CLLocation?) -> AnyPublisher<WeatherResponseEntity, Error> {
