@@ -20,19 +20,27 @@ protocol RootPresenterProtocol: AnyObject {
     
     func handleCurrentLocationRequest()
     func handleTriggeredAlert(with model: AlertModel)
+    func handleNewLocationAdded(entity: LocationEntity)
 }
 
 class RootPresenter: NSObject {
     
+    typealias Gateway = WeatherGateway & LocationsGateway
+    
     private let locationManager = CLLocationManager()
-    private var settings: Settings = UserDefaults.standard
+    private let settings: Settings
     private var hasPermissionsBeenCheckedOnAppear = false
     private var notificatonCancellable: AnyCancellable? = nil
+    @Published private(set) var pagePresenters: [WeatherPresenter] = []
+    let gateway: Gateway
     let alertPublisher = PassthroughSubject<AlertModel, Never>()
     let locationPublisher = CurrentValueSubject<LocationState, Never>(.waiting)
     
-    override init() {
+    init(gateway: Gateway, settings: Settings = UserDefaults.standard) {
+        self.gateway = gateway
+        self.settings = settings
         super.init()
+        setupPagePresenters()
         locationManager.delegate = self
         notificatonCancellable = NotificationCenter.default
             .publisher(for: UIApplication.willEnterForegroundNotification)
@@ -51,6 +59,7 @@ class RootPresenter: NSObject {
         case .denied, .restricted:
             if !settings.isLowAccuracyModeEnabled {
                 let openSettingsAction = UIAlertAction(title: "Open Settings", style: .default, handler: { _ in
+                    
                     if let url = URL(string: UIApplication.openSettingsURLString), UIApplication.shared.canOpenURL(url) {
                         UIApplication.shared.open(url)
                     }
@@ -75,6 +84,11 @@ class RootPresenter: NSObject {
         }
     }
     
+    private func setupPagePresenters() {
+        let currentPresenter = WeatherPresenter(isCurrent: true, location: nil, gateway: gateway, delegate: self)
+        pagePresenters = [currentPresenter]
+    }
+    
     func handleCurrentLocationRequest() {
         checkPermissions(using: locationManager)
     }
@@ -84,6 +98,13 @@ class RootPresenter: NSObject {
 extension RootPresenter: RootPresenterProtocol {
     
     func handleTriggeredAlert(with model: AlertModel) { alertPublisher.send(model) }
+    
+    func handleNewLocationAdded(entity: LocationEntity) {
+        pagePresenters.append(.init(isCurrent: false,
+                                    location: .init(latitude: entity.lat, longitude: entity.lon),
+                                    gateway: gateway,
+                                    delegate: self))
+    }
 }
 
 // MARK: - CLLocationManagerDelegate
@@ -98,9 +119,9 @@ extension RootPresenter: CLLocationManagerDelegate {
     }
     
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-        let alertModel = AlertModel(title: NSLocalizedString("general.error", comment: ""),
+        let alertModel = AlertModel(title: "Error",
                                     subtitle: error.localizedDescription,
-                                    actions: [.init(title: "general.ok", style: .default)])
+                                    actions: [.init(title: "OK", style: .default)])
         alertPublisher.send(alertModel)
     }
 }

@@ -11,12 +11,15 @@ import Combine
 import Alamofire
 
 protocol WeatherGateway {
-    
-    func fetchWeatherFuture(at location: CLLocation?) -> AnyPublisher<WeatherResponseEntity, Error>
+    func currentWeatherPublisher(at location: CLLocation?) -> AnyPublisher<WeatherResponseEntity, Error>
+}
+
+protocol LocationsGateway {
+    func locationsPublisher(searchPhrase: String) -> AnyPublisher<[LocationEntity], Error>
 }
 
 //MARK: - Extract to different file
-class NetworkWeatherGateway: WeatherGateway {
+class NetworkWeatherGateway: WeatherGateway, LocationsGateway {
     
     enum Constants {
         static let host = "https://api.weatherapi.com/v1/"
@@ -24,7 +27,7 @@ class NetworkWeatherGateway: WeatherGateway {
         static let key = "89f7c1735875426f82c122657230902"
     }
     
-    func fetchWeatherFuture(at location: CLLocation?) -> AnyPublisher<WeatherResponseEntity, Error> {
+    func currentWeatherPublisher(at location: CLLocation?) -> AnyPublisher<WeatherResponseEntity, Error> {
         let params: [String : String]
         if let location {
             params = createParams(using: "\(location.coordinate.latitude),\(location.coordinate.longitude)")
@@ -33,7 +36,16 @@ class NetworkWeatherGateway: WeatherGateway {
         }
         return AF
             .request(Constants.host + "current.json", parameters: params)
-            .publishDecodable(type: WeatherResponseEntity.self)
+            .publishDecodable()
+            .value()
+            .mapError({ GenericError(localizedDescription: $0.localizedDescription) })
+            .eraseToAnyPublisher()
+    }
+    
+    func locationsPublisher(searchPhrase: String) -> AnyPublisher<[LocationEntity], Error> {
+        AF
+            .request(Constants.host + "search.json", parameters: createParams(using: searchPhrase))
+            .publishDecodable()
             .value()
             .mapError({ GenericError(localizedDescription: $0.localizedDescription) })
             .eraseToAnyPublisher()

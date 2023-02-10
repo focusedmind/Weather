@@ -9,21 +9,22 @@ import Foundation
 
 struct WeatherResponseEntity: Codable {
     let current: WeatherEntity
-    let location: Location
-    
-    struct Location: Codable {
-        let name, region, country: String
-        let lat, lon: Double
-        let localtimeEpoch: Double
-        var timestamp: Date { .init(timeIntervalSince1970: localtimeEpoch) }
-
-        enum CodingKeys: String, CodingKey {
-            case name, region, country, lat, lon
-            case localtimeEpoch = "localtime_epoch"
-        }
-    }
+    let location: LocationEntity
 }
 
+struct LocationEntity: Codable {
+    let name, region, country: String
+    let lat, lon: Double
+    let localtimeEpoch: Double?
+    
+    var timestamp: Date? { localtimeEpoch.flatMap { .init(timeIntervalSince1970: $0) } }
+    var description: String { [name, region, country].joined(separator: ", ") }
+
+    enum CodingKeys: String, CodingKey {
+        case name, region, country, lat, lon
+        case localtimeEpoch = "localtime_epoch"
+    }
+}
 struct WeatherEntity: Codable {
     
     struct Condition: Codable {

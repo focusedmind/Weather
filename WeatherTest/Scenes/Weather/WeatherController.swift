@@ -10,7 +10,7 @@ import Combine
 
 class WeatherController: UIViewController {
     
-    private let presenter: WeatherPresenter
+    let presenter: WeatherPresenter
     private lazy var cancellables = Set<AnyCancellable>()
     private weak var imageView: UIImageView!
     private weak var locationLabel, temperatureLabel, humidityLabel: UILabel!
@@ -30,7 +30,6 @@ class WeatherController: UIViewController {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
         setupUI()
-        setupSearchButton()
         bindToPresenter()
     }
     
@@ -47,9 +46,8 @@ class WeatherController: UIViewController {
     }
     
     private func configure(for weatherEntity: WeatherResponseEntity) {
-        locationLabel.text = [weatherEntity.location.name,
-                              weatherEntity.location.region,
-                              weatherEntity.location.country].joined(separator: ", ")
+        locationLabel.text = weatherEntity.location.description
+        
         let tempMeasurement = Measurement(value: weatherEntity.current.tempC, unit: UnitTemperature.celsius)
         temperatureLabel.text = measurementFormatter.string(from: tempMeasurement)
         humidityLabel.text = NumberFormatter.localizedString(from: .init(value: weatherEntity.current.humidity / 100), number: .percent)
@@ -75,6 +73,7 @@ class WeatherController: UIViewController {
         stackView.spacing = 8
         stackView.axis = .vertical
         stackView.layoutMargins = .init(top: 16, left: 8, bottom: 16, right: 8)
+        stackView.isLayoutMarginsRelativeArrangement = true
         stackView.translatesAutoresizingMaskIntoConstraints = false
         
         [stackView].forEach { subView in
@@ -84,7 +83,7 @@ class WeatherController: UIViewController {
                 view.safeAreaLayoutGuide.trailingAnchor.constraint(equalTo: subView.trailingAnchor),
                 view.safeAreaLayoutGuide.topAnchor.constraint(equalTo: subView.topAnchor),
                 view.safeAreaLayoutGuide.bottomAnchor.constraint(equalTo: subView.bottomAnchor)
-           ])
+            ])
         }
         
         let locationLabel = UILabel()
@@ -101,17 +100,6 @@ class WeatherController: UIViewController {
         emptyView.setContentHuggingPriority(.defaultLow, for: .horizontal)
         emptyView.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
         [locationLabel, temperatureLabel, humidityLabel, emptyView].forEach(stackView.addArrangedSubview(_:))
-    }
-    
-    private func setupSearchButton() {
-        let searchButton = UIBarButtonItem(systemItem: .search)
-        searchButton.target = self
-        searchButton.action = #selector(handleSearchButtonTap)
-        navigationItem.setRightBarButton(searchButton, animated: false)
-    }
-    
-    @objc private func handleSearchButtonTap(_ button: UIBarButtonItem) {
-        
     }
 }
 

@@ -15,9 +15,7 @@ class WeatherPresenter: NSObject {
     private weak var delegate: RootPresenterProtocol?
     private let isCurrent: Bool
     private let gateway: WeatherGateway
-    private var locationState: LocationState {
-        didSet { loadData() }
-    }
+    private var locationState: LocationState { didSet { loadData() } }
     private var cancellables = Set<AnyCancellable>()
     private var dataLoadCancellable: AnyCancellable?
     let weatherSubject = CurrentValueSubject<WeatherResponseEntity?, Never>(nil)
@@ -40,14 +38,16 @@ class WeatherPresenter: NSObject {
     }
     
     func handleViewWillAppear() {
-        delegate?.handleCurrentLocationRequest()
+        if isCurrent {
+            delegate?.handleCurrentLocationRequest()
+        }
         loadData()
     }
     
     private func loadData() {
         if case .value(let location) = locationState {
             dataLoadCancellable = gateway
-                .fetchWeatherFuture(at: location)
+                .currentWeatherPublisher(at: location)
                 .receive(on: DispatchQueue.main)
                 .sink { [weak self] result in
                     switch result {
@@ -64,6 +64,8 @@ class WeatherPresenter: NSObject {
     
     private func handle(error: Error) {
         let action = UIAlertAction(title: "OK", style: .default)
-        delegate?.handleTriggeredAlert(with: .init(title: "Couldn't fetch weather", subtitle: error.localizedDescription, actions: [action]))
+        delegate?.handleTriggeredAlert(with: .init(title: "Couldn't fetch weather",
+                                                   subtitle: error.localizedDescription,
+                                                   actions: [action]))
     }
 }

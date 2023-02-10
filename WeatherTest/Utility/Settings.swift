@@ -7,7 +7,7 @@
 
 import Foundation
 
-protocol Settings {
+protocol Settings: AnyObject {
     
     var hasLocationServicesDisabledAlertPresented: Bool { get set }
     var hasLocationServicesDeniedAlertPresented: Bool { get set }
