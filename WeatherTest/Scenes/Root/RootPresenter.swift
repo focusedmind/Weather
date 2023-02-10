@@ -25,19 +25,25 @@ protocol RootPresenterProtocol: AnyObject {
 
 class RootPresenter: NSObject {
     
-    typealias Gateway = WeatherGateway & LocationsGateway
-    
     private let locationManager = CLLocationManager()
     private let settings: Settings
     private var hasPermissionsBeenCheckedOnAppear = false
     private var notificatonCancellable: AnyCancellable? = nil
+    private var locationsCancellable: AnyCancellable? = nil
+    private var storeCancellables = Set<AnyCancellable>()
+    private lazy var defaultPagePresenter = WeatherPresenter(isCurrent: true, location: nil, localGateway: self.localGateway,
+                                                             networkGateway: self.networkGateway, delegate: self)
     @Published private(set) var pagePresenters: [WeatherPresenter] = []
-    let gateway: Gateway
+    let networkGateway: NetworkGateway
+    let localGateway: LocalGateway
     let alertPublisher = PassthroughSubject<AlertModel, Never>()
     let locationPublisher = CurrentValueSubject<LocationState, Never>(.waiting)
     
-    init(gateway: Gateway, settings: Settings = UserDefaults.standard) {
-        self.gateway = gateway
+    init(networkGateway: NetworkGateway,
+         localGateway: LocalGateway,
+         settings: Settings = UserDefaults.standard) {
+        self.networkGateway = networkGateway
+        self.localGateway = localGateway
         self.settings = settings
         super.init()
         setupPagePresenters()
@@ -85,8 +91,28 @@ class RootPresenter: NSObject {
     }
     
     private func setupPagePresenters() {
-        let currentPresenter = WeatherPresenter(isCurrent: true, location: nil, gateway: gateway, delegate: self)
-        pagePresenters = [currentPresenter]
+        if pagePresenters.isEmpty {
+            self.pagePresenters = [defaultPagePresenter]
+        }
+        locationsCancellable = localGateway
+            .storedLocationsPublisher()
+            .receive(on: DispatchQueue.main)
+            .sink { _ in
+                
+            } receiveValue: { [weak self] locations in
+                guard let self else { return }
+                if !locations.isEmpty {
+                    self.pagePresenters = locations
+                        .map { location in
+                            return WeatherPresenter(isCurrent: location.isCurrent ?? false,
+                                                    location: .init(latitude: location.lat, longitude: location.lon),
+                                                    localGateway: self.localGateway,
+                                                    networkGateway: self.networkGateway, delegate: self)
+                        }
+                } else {
+                    self.pagePresenters = [self.defaultPagePresenter]
+                }
+            }
     }
     
     func handleCurrentLocationRequest() {
@@ -102,8 +128,13 @@ extension RootPresenter: RootPresenterProtocol {
     func handleNewLocationAdded(entity: LocationEntity) {
         pagePresenters.append(.init(isCurrent: false,
                                     location: .init(latitude: entity.lat, longitude: entity.lon),
-                                    gateway: gateway,
+                                    localGateway: localGateway,
+                                    networkGateway: networkGateway,
                                     delegate: self))
+        localGateway
+            .store(location: entity, isCurrent: false, weather: nil)
+            .sink(receiveCompletion: { _ in }, receiveValue: { _ in })
+            .store(in: &storeCancellables)
     }
 }
 

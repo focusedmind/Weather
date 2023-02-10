@@ -11,7 +11,7 @@ import CoreLocation
 
 class RootController: UIPageViewController {
     
-    private lazy var presenter = RootPresenter(gateway: NetworkWeatherGateway())
+    private lazy var presenter = RootPresenter(networkGateway: NetworkWeatherGateway(), localGateway: LocalWeatherGateway())
     private lazy var cancellables = Set<AnyCancellable>()
     private weak var searchResultsController: SearchResultsTableViewController!
     private weak var currentVC: WeatherController?
@@ -43,14 +43,14 @@ class RootController: UIPageViewController {
             .sink(receiveValue: { [weak self] presenters in
                 guard let self else { return }
                 let controllers: [UIViewController]
-                if let vc = self.currentVC {
+                if let vc = self.currentVC, presenters.isEmpty {
                     controllers = [vc]
                 } else {
                     controllers = [presenters.first.flatMap(WeatherController.init(presenter:))]
                         .compactMap({ $0 })
                     self.currentVC = controllers.first as? WeatherController
                 }
-                self.setViewControllers(controllers, direction: .forward,animated: false)
+                self.setViewControllers(controllers, direction: .forward, animated: false)
             })
             .store(in: &cancellables)
     }
@@ -63,7 +63,9 @@ class RootController: UIPageViewController {
     }
     
     private func setupSearchController() {
-        let resultsViewController = SearchResultsTableViewController(searchGateway: presenter.gateway, delegate: presenter)
+        let resultsViewController = SearchResultsTableViewController(searchGateway: presenter.networkGateway,
+                                                                     localGateway: presenter.localGateway,
+                                                                     delegate: presenter)
         self.searchResultsController = resultsViewController
         let searchController = UISearchController(searchResultsController: resultsViewController)
         searchController.searchResultsUpdater = self
@@ -104,7 +106,7 @@ extension RootController: UIPageViewControllerDataSource, UIPageViewControllerDe
             assertionFailure("Unexpected type of view controller: \(String(describing: type(of: viewController)))")
             return nil
         }
-        if let index = presenter.pagePresenters.firstIndex(of: weatherVC.presenter), index > 0 {
+        if let index = presenter.pagePresenters.firstIndex(where: { $0.id == weatherVC.presenter.id }), index > 0 {
             return WeatherController(presenter: presenter.pagePresenters[index - 1])
         } else {
             return nil
@@ -116,7 +118,8 @@ extension RootController: UIPageViewControllerDataSource, UIPageViewControllerDe
             assertionFailure("Unexpected type of view controller: \(String(describing: type(of: viewController)))")
             return nil
         }
-        if let index = presenter.pagePresenters.firstIndex(of: weatherVC.presenter), index < presenter.pagePresenters.count - 1 {
+        if let index = presenter.pagePresenters.firstIndex(where: { $0.id == weatherVC.presenter.id }),
+            index < presenter.pagePresenters.count - 1 {
             return WeatherController(presenter: presenter.pagePresenters[index + 1])
         } else {
             return nil

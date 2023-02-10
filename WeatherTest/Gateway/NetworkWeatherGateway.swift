@@ -1,24 +1,15 @@
 //
-//  WeatherGateway.swift
+//  NetworkWeatherGateway.swift
 //  WeatherTest
 //
-//  Created by iOS Developer on 2/9/23.
+//  Created by iOS Developer on 2/10/23.
 //
 
 import Foundation
-import CoreLocation
 import Combine
+import CoreLocation
 import Alamofire
 
-protocol WeatherGateway {
-    func currentWeatherPublisher(at location: CLLocation?) -> AnyPublisher<WeatherResponseEntity, Error>
-}
-
-protocol LocationsGateway {
-    func locationsPublisher(searchPhrase: String) -> AnyPublisher<[LocationEntity], Error>
-}
-
-//MARK: - Extract to different file
 class NetworkWeatherGateway: WeatherGateway, LocationsGateway {
     
     enum Constants {
@@ -38,24 +29,20 @@ class NetworkWeatherGateway: WeatherGateway, LocationsGateway {
             .request(Constants.host + "current.json", parameters: params)
             .publishDecodable()
             .value()
-            .mapError({ GenericError(localizedDescription: $0.localizedDescription) })
+            .mapError({ GenericError(errorDescription: $0.localizedDescription) })
             .eraseToAnyPublisher()
     }
     
-    func locationsPublisher(searchPhrase: String) -> AnyPublisher<[LocationEntity], Error> {
+    func locationsPublisher(for searchPhrase: String) -> AnyPublisher<[LocationEntity], Error> {
         AF
             .request(Constants.host + "search.json", parameters: createParams(using: searchPhrase))
             .publishDecodable()
             .value()
-            .mapError({ GenericError(localizedDescription: $0.localizedDescription) })
+            .mapError({ GenericError(errorDescription: $0.localizedDescription) })
             .eraseToAnyPublisher()
     }
     
     private func createParams(using query: String) -> [String : String] {
         ["key" : Constants.key, "q": query]
     }
-}
-
-struct GenericError: Error {
-    let localizedDescription: String
 }

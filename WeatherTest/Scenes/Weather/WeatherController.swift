@@ -7,13 +7,14 @@
 
 import UIKit
 import Combine
+import Kingfisher
 
 class WeatherController: UIViewController {
     
     let presenter: WeatherPresenter
     private lazy var cancellables = Set<AnyCancellable>()
-    private weak var imageView: UIImageView!
-    private weak var locationLabel, temperatureLabel, humidityLabel: UILabel!
+    private weak var iconImageView: UIImageView!
+    private weak var locationLabel, descriptionLabel, temperatureLabel, humidityLabel: UILabel!
     private weak var activityIndicator: UIActivityIndicatorView!
     private lazy var measurementFormatter = MeasurementFormatter()
     
@@ -48,9 +49,11 @@ class WeatherController: UIViewController {
     private func configure(for weatherEntity: WeatherResponseEntity) {
         locationLabel.text = weatherEntity.location.description
         
-        let tempMeasurement = Measurement(value: weatherEntity.current.tempC, unit: UnitTemperature.celsius)
+        let tempMeasurement = Measurement(value: weatherEntity.weather.tempC, unit: UnitTemperature.celsius)
         temperatureLabel.text = measurementFormatter.string(from: tempMeasurement)
-        humidityLabel.text = NumberFormatter.localizedString(from: .init(value: weatherEntity.current.humidity / 100), number: .percent)
+        humidityLabel.text = NumberFormatter.localizedString(from: .init(value: weatherEntity.weather.humidity / 100), number: .percent)
+        descriptionLabel.text = weatherEntity.weather.condition.text
+        iconImageView.kf.setImage(with: weatherEntity.weather.iconURL)
         activityIndicator.stopAnimating()
     }
     
@@ -74,9 +77,9 @@ class WeatherController: UIViewController {
         stackView.axis = .vertical
         stackView.layoutMargins = .init(top: 16, left: 8, bottom: 16, right: 8)
         stackView.isLayoutMarginsRelativeArrangement = true
-        stackView.translatesAutoresizingMaskIntoConstraints = false
         
         [stackView].forEach { subView in
+            subView.translatesAutoresizingMaskIntoConstraints = false
             view.addSubview(subView)
             NSLayoutConstraint.activate([
                 view.safeAreaLayoutGuide.leadingAnchor.constraint(equalTo: subView.leadingAnchor),
@@ -95,11 +98,33 @@ class WeatherController: UIViewController {
         self.temperatureLabel = temperatureLabel
         let humidityLabel = UILabel()
         humidityLabel.font = .preferredFont(forTextStyle: .title3)
+        let descriptionLabel = UILabel()
+        descriptionLabel.numberOfLines = 0
+        descriptionLabel.font = .preferredFont(forTextStyle: .title3)
+        self.descriptionLabel = descriptionLabel
+        let iconImageView = UIImageView()
+        iconImageView.contentMode = .scaleAspectFit
+        NSLayoutConstraint.activate([
+            iconImageView.heightAnchor.constraint(equalToConstant: 32),
+            iconImageView.heightAnchor.constraint(equalTo: iconImageView.widthAnchor)
+        ])
+        let descriptionStackView = UIStackView(arrangedSubviews: [descriptionLabel, spacer, iconImageView])
+        descriptionStackView.axis = .horizontal
+        descriptionStackView.spacing = 4
+        descriptionStackView.distribution = .fill
+        descriptionStackView.alignment = .center
+        self.iconImageView = iconImageView
         self.humidityLabel = humidityLabel
+
+        [locationLabel, temperatureLabel, humidityLabel, descriptionStackView, spacer].forEach(stackView.addArrangedSubview(_:))
+    }
+    
+    private var spacer: UIView {
         let emptyView = UIView()
+        emptyView.backgroundColor = .clear
         emptyView.setContentHuggingPriority(.defaultLow, for: .horizontal)
         emptyView.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
-        [locationLabel, temperatureLabel, humidityLabel, emptyView].forEach(stackView.addArrangedSubview(_:))
+        return emptyView
     }
 }
 

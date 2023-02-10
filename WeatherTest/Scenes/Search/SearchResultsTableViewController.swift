@@ -18,23 +18,19 @@ class SearchResultsTableViewController: UITableViewController {
     }
     
     private let searchGateway: LocationsGateway
+    private let localGateway: LocalGateway
     private weak var delegate: RootPresenterProtocol?
     private let cellId = "locationCellID"
     private var cellModels = [LocationCellModel]() { didSet { tableView.reloadData() } }
     private let inputPublisher = PassthroughSubject<String, Error>()
     private var fetchCancellable: AnyCancellable?
     
-    init(searchGateway: LocationsGateway, delegate: RootPresenterProtocol?) {
+    init(searchGateway: LocationsGateway, localGateway: LocalGateway, delegate: RootPresenterProtocol?) {
         self.searchGateway = searchGateway
+        self.localGateway = localGateway
         self.delegate = delegate
         super.init(nibName: nil, bundle: nil)
-        fetchCancellable = inputPublisher
-            .debounce(for: 0.64, scheduler: DispatchQueue.main)
-            .flatMap(self.searchGateway.locationsPublisher(searchPhrase:))
-            .map { list in return list.map { LocationCellModel(location: $0, isStored: false) } }
-            .receive(on: DispatchQueue.main)
-            .sink(receiveCompletion: { _ in },
-                  receiveValue: { [weak self] models in self?.cellModels = models })
+        setupFetcher()
     }
     
     required init?(coder: NSCoder) {
@@ -65,6 +61,23 @@ class SearchResultsTableViewController: UITableViewController {
         tableView.reloadRows(at: [.init(row: button.tag, section: 0)], with: .none)
         tableView.endUpdates()
         delegate?.handleNewLocationAdded(entity: cellModels[button.tag].location)
+        setupFetcher()
+    }
+    
+    private func setupFetcher() {
+        fetchCancellable = inputPublisher
+            .debounce(for: 0.64, scheduler: DispatchQueue.main)
+            .flatMap(self.searchGateway.locationsPublisher(for:))
+            .combineLatest(localGateway.storedLocationsPublisher())
+            .map { searchResult, storedLocations in
+                searchResult.map { location in
+                    LocationCellModel(location: location,
+                                      isStored: storedLocations.contains(where: { $0.coordinatesHash == location.coordinatesHash }))
+                }
+            }
+            .receive(on: DispatchQueue.main)
+            .sink(receiveCompletion: { _ in },
+                  receiveValue: { [weak self] models in self?.cellModels = models })
     }
 }
 
@@ -82,7 +95,8 @@ extension SearchResultsTableViewController {
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: self.cellId, for: indexPath)
         let model = cellModels[indexPath.row]
-        cell.textLabel?.text = model.location.description
+        cell.textLabel?.text = [model.location.name, model.location.region].joined(separator: ", ")
+        cell.detailTextLabel?.text = model.location.country
         if !model.isStored {
             let button = UIButton(type: .contactAdd)
             button.addTarget(self, action: #selector(handleAddButtonTap), for: .touchUpInside)

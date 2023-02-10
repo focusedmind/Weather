@@ -24,8 +24,15 @@
 		793F51A329952EC400692B65 /* WeatherController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 793F51A229952EC400692B65 /* WeatherController.swift */; };
 		793F51A629952EFD00692B65 /* WeatherPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 793F51A529952EFD00692B65 /* WeatherPresenter.swift */; };
 		793F51AC29954C1400692B65 /* WeatherResponseEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 793F51AB29954C1400692B65 /* WeatherResponseEntity.swift */; };
-		79442F46299558CC0027395B /* WeatherGateway.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79442F45299558CC0027395B /* WeatherGateway.swift */; };
+		79442F46299558CC0027395B /* Gateways.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79442F45299558CC0027395B /* Gateways.swift */; };
 		7993D806299603910059538A /* SearchResultsTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7993D805299603910059538A /* SearchResultsTableViewController.swift */; };
+		7993D80A299645DA0059538A /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 7993D809299645DA0059538A /* Kingfisher */; };
+		7993D80E29964E7B0059538A /* NetworkWeatherGateway.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7993D80D29964E7B0059538A /* NetworkWeatherGateway.swift */; };
+		7993D81029964E9C0059538A /* GenericError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7993D80F29964E9C0059538A /* GenericError.swift */; };
+		7993D81229964ECD0059538A /* LocalWeatherGateway.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7993D81129964ECD0059538A /* LocalWeatherGateway.swift */; };
+		7993D81429964FA00059538A /* WeatherEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7993D81329964FA00059538A /* WeatherEntity.swift */; };
+		7993D81629964FB70059538A /* LocationEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7993D81529964FB70059538A /* LocationEntity.swift */; };
+		7993D81A2996576B0059538A /* RealmEntities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7993D8192996576B0059538A /* RealmEntities.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -65,8 +72,16 @@
 		793F51A229952EC400692B65 /* WeatherController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherController.swift; sourceTree = "<group>"; };
 		793F51A529952EFD00692B65 /* WeatherPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherPresenter.swift; sourceTree = "<group>"; };
 		793F51AB29954C1400692B65 /* WeatherResponseEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherResponseEntity.swift; sourceTree = "<group>"; };
-		79442F45299558CC0027395B /* WeatherGateway.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherGateway.swift; sourceTree = "<group>"; };
+		79442F45299558CC0027395B /* Gateways.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Gateways.swift; sourceTree = "<group>"; };
 		7993D805299603910059538A /* SearchResultsTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchResultsTableViewController.swift; sourceTree = "<group>"; };
+		7993D80B29964DA20059538A /* ru */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ru; path = ru.lproj/Main.strings; sourceTree = "<group>"; };
+		7993D80C29964DA20059538A /* ru */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ru; path = ru.lproj/LaunchScreen.strings; sourceTree = "<group>"; };
+		7993D80D29964E7B0059538A /* NetworkWeatherGateway.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkWeatherGateway.swift; sourceTree = "<group>"; };
+		7993D80F29964E9C0059538A /* GenericError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GenericError.swift; sourceTree = "<group>"; };
+		7993D81129964ECD0059538A /* LocalWeatherGateway.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalWeatherGateway.swift; sourceTree = "<group>"; };
+		7993D81329964FA00059538A /* WeatherEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherEntity.swift; sourceTree = "<group>"; };
+		7993D81529964FB70059538A /* LocationEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationEntity.swift; sourceTree = "<group>"; };
+		7993D8192996576B0059538A /* RealmEntities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RealmEntities.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -74,6 +89,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7993D80A299645DA0059538A /* Kingfisher in Frameworks */,
 				793F519629951E2C00692B65 /* RealmSwift in Frameworks */,
 				793F519329951BB800692B65 /* Alamofire in Frameworks */,
 			);
@@ -174,6 +190,7 @@
 			children = (
 				793F519E2995282B00692B65 /* AlertModel.swift */,
 				793F51A029952BFB00692B65 /* Settings.swift */,
+				7993D80F29964E9C0059538A /* GenericError.swift */,
 			);
 			path = Utility;
 			sourceTree = "<group>";
@@ -190,7 +207,9 @@
 		793F51A82995375D00692B65 /* Entities */ = {
 			isa = PBXGroup;
 			children = (
+				7993D817299655800059538A /* Realm */,
 				793F51AB29954C1400692B65 /* WeatherResponseEntity.swift */,
+				7993D818299655890059538A /* Domain */,
 			);
 			path = Entities;
 			sourceTree = "<group>";
@@ -198,7 +217,9 @@
 		79442F44299558C50027395B /* Gateway */ = {
 			isa = PBXGroup;
 			children = (
-				79442F45299558CC0027395B /* WeatherGateway.swift */,
+				79442F45299558CC0027395B /* Gateways.swift */,
+				7993D80D29964E7B0059538A /* NetworkWeatherGateway.swift */,
+				7993D81129964ECD0059538A /* LocalWeatherGateway.swift */,
 			);
 			path = Gateway;
 			sourceTree = "<group>";
@@ -209,6 +230,23 @@
 				7993D805299603910059538A /* SearchResultsTableViewController.swift */,
 			);
 			path = Search;
+			sourceTree = "<group>";
+		};
+		7993D817299655800059538A /* Realm */ = {
+			isa = PBXGroup;
+			children = (
+				7993D8192996576B0059538A /* RealmEntities.swift */,
+			);
+			path = Realm;
+			sourceTree = "<group>";
+		};
+		7993D818299655890059538A /* Domain */ = {
+			isa = PBXGroup;
+			children = (
+				7993D81529964FB70059538A /* LocationEntity.swift */,
+				7993D81329964FA00059538A /* WeatherEntity.swift */,
+			);
+			path = Domain;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -230,6 +268,7 @@
 			packageProductDependencies = (
 				793F519229951BB800692B65 /* Alamofire */,
 				793F519529951E2C00692B65 /* RealmSwift */,
+				7993D809299645DA0059538A /* Kingfisher */,
 			);
 			productName = WeatherTest;
 			productReference = 793F515E2995175500692B65 /* WeatherTest.app */;
@@ -301,11 +340,13 @@
 			knownRegions = (
 				en,
 				Base,
+				ru,
 			);
 			mainGroup = 793F51552995175500692B65;
 			packageReferences = (
 				793F519129951BB800692B65 /* XCRemoteSwiftPackageReference "Alamofire" */,
 				793F519429951E2C00692B65 /* XCRemoteSwiftPackageReference "realm-swift" */,
+				7993D808299645DA0059538A /* XCRemoteSwiftPackageReference "Kingfisher" */,
 			);
 			productRefGroup = 793F515F2995175500692B65 /* Products */;
 			projectDirPath = "";
@@ -351,15 +392,21 @@
 			buildActionMask = 2147483647;
 			files = (
 				793F51A629952EFD00692B65 /* WeatherPresenter.swift in Sources */,
-				79442F46299558CC0027395B /* WeatherGateway.swift in Sources */,
+				79442F46299558CC0027395B /* Gateways.swift in Sources */,
+				7993D81A2996576B0059538A /* RealmEntities.swift in Sources */,
 				793F519A2995263100692B65 /* RootPresenter.swift in Sources */,
 				793F51662995175500692B65 /* RootController.swift in Sources */,
 				793F51622995175500692B65 /* AppDelegate.swift in Sources */,
+				7993D81629964FB70059538A /* LocationEntity.swift in Sources */,
+				7993D81229964ECD0059538A /* LocalWeatherGateway.swift in Sources */,
 				793F51A129952BFB00692B65 /* Settings.swift in Sources */,
+				7993D81429964FA00059538A /* WeatherEntity.swift in Sources */,
 				793F51A329952EC400692B65 /* WeatherController.swift in Sources */,
 				793F519F2995282B00692B65 /* AlertModel.swift in Sources */,
 				7993D806299603910059538A /* SearchResultsTableViewController.swift in Sources */,
 				793F51AC29954C1400692B65 /* WeatherResponseEntity.swift in Sources */,
+				7993D80E29964E7B0059538A /* NetworkWeatherGateway.swift in Sources */,
+				7993D81029964E9C0059538A /* GenericError.swift in Sources */,
 				793F51642995175500692B65 /* SceneDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -401,6 +448,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				793F51682995175500692B65 /* Base */,
+				7993D80B29964DA20059538A /* ru */,
 			);
 			name = Main.storyboard;
 			sourceTree = "<group>";
@@ -409,6 +457,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				793F516D2995175600692B65 /* Base */,
+				7993D80C29964DA20059538A /* ru */,
 			);
 			name = LaunchScreen.storyboard;
 			sourceTree = "<group>";
@@ -420,6 +469,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
@@ -466,7 +516,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -480,6 +530,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
@@ -520,7 +571,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
@@ -730,6 +781,14 @@
 				kind = branch;
 			};
 		};
+		7993D808299645DA0059538A /* XCRemoteSwiftPackageReference "Kingfisher" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/onevcat/Kingfisher.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 7.0.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -742,6 +801,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 793F519429951E2C00692B65 /* XCRemoteSwiftPackageReference "realm-swift" */;
 			productName = RealmSwift;
+		};
+		7993D809299645DA0059538A /* Kingfisher */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 7993D808299645DA0059538A /* XCRemoteSwiftPackageReference "Kingfisher" */;
+			productName = Kingfisher;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
